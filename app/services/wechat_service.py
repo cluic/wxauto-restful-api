@@ -35,15 +35,20 @@ def get_wechat(wxname: str) -> WeChat:
             # 获取第一个有效的实例
             for cached_wx in WxClient.values():
                 if check_wechat_alive(cached_wx):
+                    print(f"[缓存命中] 使用缓存的微信实例: {cached_wx.nickname}")
                     return cached_wx
             # 如果没有有效实例，创建新的
+            print("[缓存失效] 所有缓存实例都失效，创建新实例")
             wx = WeChat()
             WxClient[wx.nickname] = wx
+            print(f"[新实例] 已创建并缓存: {wx.nickname}")
             return wx
         else:
             # 缓存为空，创建新实例
+            print("[缓存为空] 创建新实例")
             wx = WeChat()
             WxClient[wx.nickname] = wx
+            print(f"[新实例] 已创建并缓存: {wx.nickname}")
             return wx
 
     # 如果指定了 wxname
@@ -51,17 +56,21 @@ def get_wechat(wxname: str) -> WeChat:
         wx = WxClient[wxname]
         # 检查缓存的实例是否有效
         if check_wechat_alive(wx):
+            print(f"[缓存命中] 使用缓存的微信实例: {wxname}")
             return wx
         else:
             # 实例已失效，重新创建
-            print(f"微信实例 {wxname} 已失效，重新创建")
+            print(f"[缓存失效] 微信实例 {wxname} 已失效，重新创建")
             wx = WeChat(nickname=wxname)
             WxClient[wxname] = wx
+            print(f"[新实例] 已重新创建并缓存: {wxname}")
             return wx
     else:
         # 缓存中没有，创建新实例并缓存
+        print(f"[缓存未命中] 实例 {wxname} 不在缓存中，创建新实例")
         wx = WeChat(nickname=wxname)
         WxClient[wxname] = wx
+        print(f"[新实例] 已创建并缓存: {wxname}")
         return wx
 
 def get_wechat_subwin(wxname: str, who: str) -> Optional[Chat]:

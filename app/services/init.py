@@ -21,12 +21,17 @@ try:
 except Exception as e:
     print(f"警告：无法导入WxResponse: {e}")
 
-# 获取微信客户端
+# 获取微信客户端（全局缓存字典）
+WxClient = {}
 try:
-    WxClient = {}
-    for client in get_wx_clients():
+    clients = get_wx_clients()
+    for client in clients:
         WxClient[client.nickname] = client
-        client.StopListening()
+        # 尝试停止监听，如果失败也不影响缓存
+        try:
+            client.StopListening()
+        except Exception:
+            pass  # 忽略 StopListening 错误
+    print(f"成功初始化 {len(WxClient)} 个微信客户端实例")
 except Exception as e:
-    print(f"警告：无法获取微信客户端: {e}")
-    WxClient = {}
+    print(f"警告：获取微信客户端时出错: {e}")
