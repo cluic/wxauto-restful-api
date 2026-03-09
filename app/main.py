@@ -153,7 +153,7 @@ async def root():
 app.include_router(wechat.router, prefix=f"{settings.api.prefix}/wechat", tags=["WeChat"], dependencies=[Depends(get_current_token)])
 # app.include_router(chat.router, prefix=f"{settings.api.prefix}/chat", tags=["Chat"], dependencies=[Depends(get_current_token)])
 # app.include_router(apps.router, prefix=f"{settings.api.prefix}/apps", tags=["Apps"], dependencies=[Depends(get_current_token)])
-app.include_router(files.router, prefix="/api/v1/files", tags=["files"])
+app.include_router(files.router, prefix=f"{settings.api.prefix}/files", tags=["files"])
 app.include_router(info.router, prefix=f"{settings.api.prefix}/info", tags=["Info"])
 # app.include_router(listen.router, prefix=f"{settings.api.prefix}/listen", tags=["Listen"])
 # 激活相关接口无需认证

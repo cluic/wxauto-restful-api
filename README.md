@@ -126,54 +126,54 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000
 ### 微信功能接口
 
 #### 初始化
-- `POST /api/v1/wechat/initialize` - 初始化微信实例
-- `GET /api/v1/wechat/status` - 获取微信状态
+- `POST /v1/wechat/initialize` - 初始化微信实例
+- `GET /v1/wechat/status` - 获取微信状态
 
 #### 消息功能
-- `POST /api/v1/wechat/send` - 发送消息
-- `POST /api/v1/wechat/sendfile` - 发送文件
-- `POST /api/v1/wechat/sendurlcard` - 发送 URL 卡片
-- `POST /api/v1/wechat/getallmessage` - 获取当前窗口消息
-- `POST /api/v1/wechat/gethistorymessage` - 获取历史消息
-- `POST /api/v1/wechat/getnextnewmessage` - 获取新消息
+- `POST /v1/wechat/send` - 发送消息
+- `POST /v1/wechat/sendfile` - 发送文件
+- `POST /v1/wechat/sendurlcard` - 发送 URL 卡片
+- `POST /v1/wechat/getallmessage` - 获取当前窗口消息
+- `POST /v1/wechat/gethistorymessage` - 获取历史消息
+- `POST /v1/wechat/getnextnewmessage` - 获取新消息
 
 #### 会话管理
-- `POST /api/v1/wechat/getsession` - 获取会话列表
-- `POST /api/v1/wechat/getsubwindow` - 获取指定子窗口
-- `POST /api/v1/wechat/getallsubwindow` - 获取所有子窗口
-- `POST /api/v1/wechat/chatwith` - 切换聊天窗口
+- `POST /v1/wechat/getsession` - 获取会话列表
+- `POST /v1/wechat/getsubwindow` - 获取指定子窗口
+- `POST /v1/wechat/getallsubwindow` - 获取所有子窗口
+- `POST /v1/wechat/chatwith` - 切换聊天窗口
 
 #### 好友管理
-- `POST /api/v1/wechat/getfriends` - 获取好友列表
-- `POST /api/v1/wechat/getmyinfo` - 获取我的信息
+- `POST /v1/wechat/getfriends` - 获取好友列表
+- `POST /v1/wechat/getmyinfo` - 获取我的信息
 
 #### 群聊管理
-- `POST /api/v1/wechat/getrecentgroups` - 获取群聊列表
+- `POST /v1/wechat/getrecentgroups` - 获取群聊列表
 
 #### 页面控制
-- `POST /api/v1/wechat/switch/chat` - 切换到聊天页面
-- `POST /api/v1/wechat/switch/contact` - 切换到联系人页面
-- `POST /api/v1/wechat/isonline` - 检查在线状态
+- `POST /v1/wechat/switch/chat` - 切换到聊天页面
+- `POST /v1/wechat/switch/contact` - 切换到联系人页面
+- `POST /v1/wechat/isonline` - 检查在线状态
 
 ### 聊天接口
-- `POST /api/v1/chat/send` - 子窗口发送消息
-- `POST /api/v1/chat/getallmessage` - 获取子窗口所有消息
-- `POST /api/v1/chat/getnewmessage` - 获取子窗口新消息
-- `POST /api/v1/chat/msg/quote` - 发送引用消息
-- `POST /api/v1/chat/close` - 关闭子窗口
+- `POST /v1/chat/send` - 子窗口发送消息
+- `POST /v1/chat/getallmessage` - 获取子窗口所有消息
+- `POST /v1/chat/getnewmessage` - 获取子窗口新消息
+- `POST /v1/chat/msg/quote` - 发送引用消息
+- `POST /v1/chat/close` - 关闭子窗口
 
 ### 文件管理接口
-- `POST /api/v1/files/upload` - 上传文件
-- `GET /api/v1/files/{file_id}` - 获取文件信息
-- `DELETE /api/v1/files/{file_id}` - 删除文件
-- `GET /api/v1/files/` - 获取文件列表
+- `POST /v1/files/upload` - 上传文件
+- `GET /v1/files/{file_id}` - 获取文件信息
+- `DELETE /v1/files/{file_id}` - 删除文件
+- `GET /v1/files/` - 获取文件列表
 
 ### 激活接口
-- `POST /api/v1/activation/activate` - 激活许可证
-- `GET /api/v1/activation/check` - 检查激活状态
+- `POST /v1/activation/activate` - 激活许可证
+- `GET /v1/activation/check` - 检查激活状态
 
 ### 信息接口
-- `GET /api/v1/info/package` - 获取包信息
+- `GET /v1/info/package` - 获取包信息
 
 ## 认证
 
