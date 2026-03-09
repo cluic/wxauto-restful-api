@@ -10,6 +10,7 @@ from app.utils.wx_package_manager import get_supported_features
 from app.middleware.concurrency import ConcurrencyControlMiddleware
 from typing import Any, Dict
 from fastapi.responses import HTMLResponse
+from pathlib import Path
 
 app = FastAPI(
     title="wxautox4 API",
@@ -70,6 +71,45 @@ async def startup_event():
     # 尝试初始化微信实例
     # 即使失败也不影响服务启动
     initialize_wechat_on_startup()
+
+# 关闭事件：清理资源
+@app.on_event("shutdown")
+async def shutdown_event():
+    """服务关闭时清理资源"""
+    import logging
+    logger = logging.getLogger(__name__)
+
+    logger.info("正在关闭服务...")
+
+    # 清理服务管理器状态
+    try:
+        from app.services.service_manager import get_service_manager
+        service_manager = get_service_manager()
+        service_manager.stop_service()
+        logger.info("服务管理器状态已清理")
+    except Exception as e:
+        logger.error(f"清理服务管理器状态失败: {e}")
+
+    # 清理微信连接（如果存在）
+    try:
+        from app.services.wechat_service import WeChatService
+        wechat_service = WeChatService()
+        if hasattr(wechat_service, 'cleanup'):
+            await wechat_service.cleanup()
+            logger.info("微信连接已关闭")
+    except Exception as e:
+        logger.error(f"关闭微信连接失败: {e}")
+
+    # 关闭监听服务（如果正在运行）
+    try:
+        from app.services.listen_service import listen_service
+        if hasattr(listen_service, 'stop'):
+            listen_service.stop()
+            logger.info("监听服务已停止")
+    except Exception as e:
+        logger.error(f"停止监听服务失败: {e}")
+
+    logger.info("服务关闭完成")
 
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request: Request, exc: HTTPException):

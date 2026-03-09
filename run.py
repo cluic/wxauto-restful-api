@@ -99,6 +99,18 @@ def main() -> None:
 
     try:
         import threading
+        import signal
+
+        # 设置信号处理器
+        def signal_handler(signum, frame):
+            """处理终止信号"""
+            logger.info(f"收到信号 {signum}，正在关闭服务...")
+            service_manager.stop_service()
+            sys.exit(0)
+
+        signal.signal(signal.SIGINT, signal_handler)
+        signal.signal(signal.SIGTERM, signal_handler)
+
         threading.Thread(target=open_browser, args=(url,), daemon=True).start()
 
         # 启动uvicorn服务器
@@ -110,12 +122,16 @@ def main() -> None:
             log_level=settings.logging.level.lower()
         )
     except KeyboardInterrupt:
-        logger.info("服务已停止")
+        logger.info("收到键盘中断，正在关闭服务...")
         service_manager.stop_service()
     except Exception as e:
         logger.error(f"启动服务失败: {e}")
         service_manager.stop_service()
         sys.exit(1)
+    finally:
+        # 确保资源被清理
+        logger.info("服务已停止")
+        service_manager.stop_service()
 
 if __name__ == "__main__":
     main() 

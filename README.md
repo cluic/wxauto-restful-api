@@ -105,17 +105,17 @@ auth:
 ### 4. 启动服务
 
 ```bash
-# 1. bat直接运行
+# 使用 bat 脚本启动（Windows）
 run.bat
 
-# python运行
+# 使用 Python 启动
 python run.py
 
 # 或使用 uvicorn
-uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+uvicorn app.main:app --host 0.0.0.0 --port 8000
 ```
 
-### 5. 访问 API 文档
+### 6. 访问 API 文档
 
 打开浏览器访问: http://localhost:8000/docs
 
