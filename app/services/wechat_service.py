@@ -919,6 +919,7 @@ class WeChatService:
 
             wx = get_wechat(wxname)
             result = wx.GetFriendDetails(n=n, save_head_image=save_head_image)
+            wx.SwitchToChat()
             return list_response(items=result, message="")
 
         return await self._queue.submit(_get_friends)
