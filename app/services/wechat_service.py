@@ -150,9 +150,9 @@ def get_wechat_subwin(wxname: str, who: str) -> Optional[Chat]:
 
 def get_raw_messages(msgs, chat_info):
     # result = {}
-
+    raw_msgs = []
     if msgs:
-        raw_msgs = []
+        
         for msg in msgs:
             raw = msg.raw.copy()
             items = list(raw.keys())
