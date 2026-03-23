@@ -240,9 +240,10 @@ class WeChatService:
 
             # result = wx.SendMsg(msg=msg, who=who, clear=clear, at=at, exact=exact)
             result = safe_send_msg(wx, target=who, msg=msg)
-            message = result.get('message') or '操作成功'
-            return APIResponse(success=bool(result), message=message, data=result.get('data'))
-
+            if result:
+                return APIResponse(success=True, message='发送成功')
+            else:
+                return APIResponse(success=False, message='发送失败')
         return await self._queue.submit(_send)
 
     @handle_service_error(custom_message="发送消息失败")
@@ -259,8 +260,10 @@ class WeChatService:
         wx = get_wechat(wxname)
         # result = wx.SendMsg(msg=msg, who=who, clear=clear, at=at, exact=exact)
         result = safe_send_msg(wx, target=who, msg=msg)
-        message = result.get('message') or '操作成功'
-        return APIResponse(success=bool(result), message=message, data=result.get('data'))
+        if result:
+            return APIResponse(success=True, message='发送成功')
+        else:
+            return APIResponse(success=False, message='发送失败')
 
     async def send_file(
             self,
@@ -323,7 +326,9 @@ class WeChatService:
 
         # 发送文件
         wx = get_wechat(wxname)
-        result = wx.SendFiles(filepath=file_info.file_path, who=who, exact=exact)
+        if not safe_switch_chat(wx, target=who):
+            return APIResponse(success=False, message="文件发送失败")
+        result = wx.SendFiles(filepath=file_info.file_path)
 
         if result:
             return APIResponse(
@@ -353,8 +358,9 @@ class WeChatService:
             wx = get_wechat(wxname)
             result = safe_switch_chat(wx, target=who)
             if result:
+                chat_info = wx.ChatInfo()
                 return single_object(
-                    obj={"name": result, "type": "unknown"},
+                    obj={"name": chat_info.get('chat_name'), "type": chat_info.get('chat_type')},
                     message='主窗口聊天切换成功'
                 )
             else:
@@ -375,8 +381,9 @@ class WeChatService:
         wx = get_wechat(wxname)
         result = safe_switch_chat(wx, target=who)
         if result:
+            chat_info = wx.ChatInfo()
             return single_object(
-                obj={"name": result, "type": "unknown"},
+                obj={"name": chat_info.get('chat_name'), "type": chat_info.get('chat_type')},
                 message='主窗口聊天切换成功'
             )
         else:
