@@ -170,6 +170,23 @@ async def chat_with(
     return result
 
 @router.post(
+    "/chatinfo",
+    operation_id="[wx]获取聊天信息",
+    response_model=APIResponse,
+    summary="获取当前或指定聊天窗口信息"
+)
+async def get_chat_info(
+    request: ChatInfoRequest,
+    service: WeChatService = Depends()
+):
+    """获取聊天信息；指定 who 时先切换到该聊天。"""
+    return await service.get_chat_info(
+        who=request.who,
+        exact=request.exact,
+        wxname=request.wxname
+    )
+
+@router.post(
     "/getsession",
     operation_id="[wx]获取会话列表",
     response_model=APIResponse,
@@ -363,6 +380,112 @@ async def get_next_new_message(
 #         timeout=request.timeout,
 #         wxname=request.wxname
 #     )
+
+@router.post(
+    "/group/members/add",
+    operation_id="[wx]添加群成员",
+    response_model=APIResponse,
+    summary="✨向当前或指定群聊添加一个或多个成员"
+)
+async def add_group_members(
+    request: AddGroupMembersRequest,
+    service: WeChatService = Depends()
+):
+    """添加群成员。"""
+    return await service.add_group_members(
+        who=request.who,
+        members=request.members,
+        exact=request.exact,
+        wxname=request.wxname
+    )
+
+@router.post(
+    "/group/create",
+    operation_id="[wx]创建群聊",
+    response_model=APIResponse,
+    summary="✨使用联系人列表创建群聊"
+)
+async def create_group(
+    request: CreateGroupRequest,
+    service: WeChatService = Depends()
+):
+    """创建群聊。"""
+    return await service.create_group(
+        contacts=request.contacts,
+        wxname=request.wxname
+    )
+
+@router.post(
+    "/group/name",
+    operation_id="[wx]修改群聊名称",
+    response_model=APIResponse,
+    summary="✨修改当前或指定群聊名称"
+)
+async def set_group_name(
+    request: SetGroupNameRequest,
+    service: WeChatService = Depends()
+):
+    """修改群聊名称。"""
+    return await service.set_group_name(
+        who=request.who,
+        value=request.value,
+        exact=request.exact,
+        wxname=request.wxname
+    )
+
+@router.post(
+    "/group/remark",
+    operation_id="[wx]修改群聊备注",
+    response_model=APIResponse,
+    summary="✨修改当前或指定群聊备注"
+)
+async def set_group_remark(
+    request: SetGroupRemarkRequest,
+    service: WeChatService = Depends()
+):
+    """修改群聊备注。"""
+    return await service.set_group_remark(
+        who=request.who,
+        value=request.value,
+        exact=request.exact,
+        wxname=request.wxname
+    )
+
+@router.post(
+    "/group/announcement",
+    operation_id="[wx]修改群公告",
+    response_model=APIResponse,
+    summary="✨修改当前或指定群公告"
+)
+async def set_group_announcement(
+    request: SetGroupAnnouncementRequest,
+    service: WeChatService = Depends()
+):
+    """修改群公告。"""
+    return await service.set_group_announcement(
+        who=request.who,
+        value=request.value,
+        exact=request.exact,
+        wxname=request.wxname
+    )
+
+@router.post(
+    "/group/my-nickname",
+    operation_id="[wx]修改群内昵称",
+    response_model=APIResponse,
+    summary="✨修改我在当前或指定群聊中的昵称"
+)
+async def set_group_my_nickname(
+    request: SetGroupMyNicknameRequest,
+    service: WeChatService = Depends()
+):
+    """修改群内昵称。"""
+    return await service.set_group_my_nickname(
+        who=request.who,
+        value=request.value,
+        exact=request.exact,
+        wxname=request.wxname
+    )
 
 @router.post(
     "/getrecentgroups",

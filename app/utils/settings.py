@@ -1,4 +1,4 @@
-from wxautox import WxParam
+from wxautox4 import WxParam
 
 class Settings:
     WECHAT_APP_PATH: str = "C:/Program Files/WeChat/WeChat.exe"

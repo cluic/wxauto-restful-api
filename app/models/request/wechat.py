@@ -20,6 +20,11 @@ class SendMessageRequest(BaseChatRelevantRequest):
 class ChatWithRequest(BaseChatRelevantRequest):
     pass
 
+# 获取聊天窗口信息
+class ChatInfoRequest(BaseRequest):
+    who: Optional[str] = None
+    exact: bool = False
+
 # 发送文件请求
 class SendFileRequest(BaseChatRelevantRequest):
     file_id: str  # 文件ID，对应上传的文件
@@ -90,6 +95,35 @@ class GetHistoryMessageRequest(BaseChatRelevantRequest):
 
 # 获取群聊列表请求
 class GetAllRecentGroupsRequest(BaseRequest):
+    pass
+
+# 群聊目标请求
+class BaseGroupRequest(BaseRequest):
+    who: Optional[str] = None
+    exact: bool = False
+
+# 添加群成员
+class AddGroupMembersRequest(BaseGroupRequest):
+    members: Union[str, List[str]]
+
+# 创建群聊
+class CreateGroupRequest(BaseRequest):
+    contacts: List[str]
+
+# 修改群聊字段
+class SetGroupValueRequest(BaseGroupRequest):
+    value: str
+
+class SetGroupNameRequest(SetGroupValueRequest):
+    pass
+
+class SetGroupRemarkRequest(SetGroupValueRequest):
+    pass
+
+class SetGroupAnnouncementRequest(SetGroupValueRequest):
+    pass
+
+class SetGroupMyNicknameRequest(SetGroupValueRequest):
     pass
 
 # 获取好友列表请求

@@ -1,1421 +1,2279 @@
 {
-    "openapi": "3.1.0",
-    "info": {
-        "title": "wxauto API",
-        "version": "1.0.0"
-    },
-    "servers": [
-        {
-          "url": "http://127.0.0.1:8000"
+  "openapi": "3.0.3",
+  "info": {
+    "title": "wxautox4 API",
+    "description": "wxautox4微信自动化API服务",
+    "version": "2.0.0"
+  },
+  "paths": {
+    "/": {
+      "get": {
+        "summary": "Root",
+        "description": "根路径\n\nReturns:\n    dict: 欢迎信息和包信息",
+        "operationId": "root__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
         }
-    ],
-    "paths": {
-        "/": {
-            "get": {
-                "summary": "Root",
-                "operationId": "root__get",
-                "responses": {
-                    "200": {
-                        "description": "Successful Response",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
-                    }
+      }
+    },
+    "/v1/wechat/initialize": {
+      "post": {
+        "tags": [
+          "WeChat"
+        ],
+        "summary": "🔑 获取/初始化微信实例（核心功能前置接口）",
+        "description": "获取或初始化微信实例\n\n此接口用于：\n1. 检测微信是否已激活\n2. 获取微信实例并全局缓存\n3. 供后续核心功能使用\n\n建议：\n- 服务启动时会自动调用此接口\n- 如果初始化失败，可手动调用此接口重试\n- 使用其他核心功能前建议先调用此接口\n\nReturns:\n    APIResponse: 包含初始化状态和微信实例信息",
+        "operationId": "[wx]获取微信实例",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse"
                 }
+              }
             }
+          }
         },
-        "/v1/wechat/send": {
-            "post": {
-                "tags": [
-                    "WeChat"
-                ],
-                "summary": "Send Message",
-                "description": "微信主窗口发送消息",
-                "operationId": "[wx]发送消息",
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/app__models__request__wechat__SendMessageRequest"
-                            }
-                        }
-                    },
-                    "required": true
-                },
-                "responses": {
-                    "200": {
-                        "description": "Successful Response",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/APIResponse"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation Error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/HTTPValidationError"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "HTTPBearer": []
-                    }
-                ]
-            }
-        },
-        "/v1/wechat/chatwith": {
-            "post": {
-                "tags": [
-                    "WeChat"
-                ],
-                "summary": "Chat With",
-                "description": "微信主窗口切换聊天窗口",
-                "operationId": "[wx]切换聊天窗口",
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/ChatWithRequest"
-                            }
-                        }
-                    },
-                    "required": true
-                },
-                "responses": {
-                    "200": {
-                        "description": "Successful Response",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/APIResponse"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation Error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/HTTPValidationError"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "HTTPBearer": []
-                    }
-                ]
-            }
-        },
-        "/v1/wechat/sendurlcard": {
-            "post": {
-                "tags": [
-                    "WeChat"
-                ],
-                "summary": "Send Url Card",
-                "description": "微信发送url卡片",
-                "operationId": "[wx]发送url卡片",
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/SendUrlCardRequest"
-                            }
-                        }
-                    },
-                    "required": true
-                },
-                "responses": {
-                    "200": {
-                        "description": "Successful Response",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/APIResponse"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation Error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/HTTPValidationError"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "HTTPBearer": []
-                    }
-                ]
-            }
-        },
-        "/v1/wechat/getallsubwindow": {
-            "post": {
-                "tags": [
-                    "WeChat"
-                ],
-                "summary": "Get All Sub Window",
-                "description": "获取微信所有子窗口信息",
-                "operationId": "[wx]获取所有子窗口",
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/GetAllSubWindowRequest"
-                            }
-                        }
-                    },
-                    "required": true
-                },
-                "responses": {
-                    "200": {
-                        "description": "Successful Response",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/APIResponse"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation Error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/HTTPValidationError"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "HTTPBearer": []
-                    }
-                ]
-            }
-        },
-        "/v1/wechat/addlistenchat": {
-            "post": {
-                "tags": [
-                    "WeChat"
-                ],
-                "summary": "Add Listen Chat",
-                "description": "添加微信子窗口监听",
-                "operationId": "[wx]添加监听",
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/AddListenChatRequest"
-                            }
-                        }
-                    },
-                    "required": true
-                },
-                "responses": {
-                    "200": {
-                        "description": "Successful Response",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/APIResponse"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation Error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/HTTPValidationError"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "HTTPBearer": []
-                    }
-                ]
-            }
-        },
-        "/v1/wechat/getnextnewmessage": {
-            "post": {
-                "tags": [
-                    "WeChat"
-                ],
-                "summary": "Get Next New Message",
-                "description": "获取微信下一个新消息",
-                "operationId": "[wx]获取下一个新消息",
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/GetNextNewMessageRequest"
-                            }
-                        }
-                    },
-                    "required": true
-                },
-                "responses": {
-                    "200": {
-                        "description": "Successful Response",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/APIResponse"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation Error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/HTTPValidationError"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "HTTPBearer": []
-                    }
-                ]
-            }
-        },
-        "/v1/wechat/getallmessage": {
-            "post": {
-                "tags": [
-                    "WeChat"
-                ],
-                "summary": "Get All Message",
-                "description": "获取微信所有消息",
-                "operationId": "[wx]获取所有消息",
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/app__models__request__wechat__GetAllMessageRequest"
-                            }
-                        }
-                    },
-                    "required": true
-                },
-                "responses": {
-                    "200": {
-                        "description": "Successful Response",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/APIResponse"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation Error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/HTTPValidationError"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "HTTPBearer": []
-                    }
-                ]
-            }
-        },
-        "/v1/wechat/msg/quote": {
-            "post": {
-                "tags": [
-                    "WeChat"
-                ],
-                "summary": "Send Quote By Id",
-                "description": "根据id发送引用消息",
-                "operationId": "[wx]发送引用消息",
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/app__models__request__wechat__SendQuoteByIdRequest"
-                            }
-                        }
-                    },
-                    "required": true
-                },
-                "responses": {
-                    "200": {
-                        "description": "Successful Response",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/APIResponse"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation Error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/HTTPValidationError"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "HTTPBearer": []
-                    }
-                ]
-            }
-        },
-        "/v1/wechat/getnewfriends": {
-            "post": {
-                "tags": [
-                    "WeChat"
-                ],
-                "summary": "Get New Friends",
-                "description": "获取微信新朋友",
-                "operationId": "[wx]获取好友申请",
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/GetNewFriendsRequest"
-                            }
-                        }
-                    },
-                    "required": true
-                },
-                "responses": {
-                    "200": {
-                        "description": "Successful Response",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/APIResponse"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation Error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/HTTPValidationError"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "HTTPBearer": []
-                    }
-                ]
-            }
-        },
-        "/v1/wechat/newfriend/accept": {
-            "post": {
-                "tags": [
-                    "WeChat"
-                ],
-                "summary": "Accept New Friend",
-                "description": "接受微信新朋友",
-                "operationId": "[wx]接受好友申请",
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/app__models__request__wechat__AcceptNewFriendRequest"
-                            }
-                        }
-                    },
-                    "required": true
-                },
-                "responses": {
-                    "200": {
-                        "description": "Successful Response",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/APIResponse"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation Error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/HTTPValidationError"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "HTTPBearer": []
-                    }
-                ]
-            }
-        },
-        "/v1/wechat/switch/chat": {
-            "post": {
-                "tags": [
-                    "WeChat"
-                ],
-                "summary": "Switch To Chat Page",
-                "description": "切换到聊天页面",
-                "operationId": "[wx]切换到聊天页面",
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/SwitchToChatPageRequest"
-                            }
-                        }
-                    },
-                    "required": true
-                },
-                "responses": {
-                    "200": {
-                        "description": "Successful Response",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/APIResponse"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation Error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/HTTPValidationError"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "HTTPBearer": []
-                    }
-                ]
-            }
-        },
-        "/v1/wechat/switch/contact": {
-            "post": {
-                "tags": [
-                    "WeChat"
-                ],
-                "summary": "Switch To Contact Page",
-                "description": "切换到联系人页面",
-                "operationId": "[wx]切换到联系人页面",
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/SwitchToContactPageRequest"
-                            }
-                        }
-                    },
-                    "required": true
-                },
-                "responses": {
-                    "200": {
-                        "description": "Successful Response",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/APIResponse"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation Error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/HTTPValidationError"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "HTTPBearer": []
-                    }
-                ]
-            }
-        },
-        "/v1/chat/send": {
-            "post": {
-                "tags": [
-                    "Chat"
-                ],
-                "summary": "Send Message",
-                "description": "微信子窗口发送消息",
-                "operationId": "[chat]发送消息",
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/app__models__request__chat__SendMessageRequest"
-                            }
-                        }
-                    },
-                    "required": true
-                },
-                "responses": {
-                    "200": {
-                        "description": "Successful Response",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation Error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/HTTPValidationError"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "HTTPBearer": []
-                    }
-                ]
-            }
-        },
-        "/v1/chat/getallmessage": {
-            "post": {
-                "tags": [
-                    "Chat"
-                ],
-                "summary": "Get All Message",
-                "description": "获取微信子窗口所有消息",
-                "operationId": "[chat]获取所有消息",
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/app__models__request__chat__GetAllMessageRequest"
-                            }
-                        }
-                    },
-                    "required": true
-                },
-                "responses": {
-                    "200": {
-                        "description": "Successful Response",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation Error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/HTTPValidationError"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "HTTPBearer": []
-                    }
-                ]
-            }
-        },
-        "/v1/chat/getnewmessage": {
-            "post": {
-                "tags": [
-                    "Chat"
-                ],
-                "summary": "Get New Message",
-                "description": "获取微信子窗口新消息",
-                "operationId": "[chat]获取新消息",
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/GetNewMessageRequest"
-                            }
-                        }
-                    },
-                    "required": true
-                },
-                "responses": {
-                    "200": {
-                        "description": "Successful Response",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation Error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/HTTPValidationError"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "HTTPBearer": []
-                    }
-                ]
-            }
-        },
-        "/v1/chat/msg/quote": {
-            "post": {
-                "tags": [
-                    "Chat"
-                ],
-                "summary": "Send Quote By Id",
-                "description": "根据id发送引用消息",
-                "operationId": "[chat]发送引用消息",
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/app__models__request__chat__SendQuoteByIdRequest"
-                            }
-                        }
-                    },
-                    "required": true
-                },
-                "responses": {
-                    "200": {
-                        "description": "Successful Response",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation Error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/HTTPValidationError"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "HTTPBearer": []
-                    }
-                ]
-            }
-        },
-        "/v1/apps/accept_new_friend": {
-            "post": {
-                "tags": [
-                    "Apps"
-                ],
-                "summary": "Api Accept New Friend",
-                "description": "接受新好友",
-                "operationId": "[apps]接受新好友",
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/app__models__request__apps__AcceptNewFriendRequest"
-                            }
-                        }
-                    },
-                    "required": true
-                },
-                "responses": {
-                    "200": {
-                        "description": "Successful Response",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/APIResponse"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation Error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/HTTPValidationError"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "HTTPBearer": []
-                    }
-                ]
-            }
-        }
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
     },
-    "components": {
-        "schemas": {
-            "APIResponse": {
-                "properties": {
-                    "success": {
-                        "type": "boolean",
-                        "title": "Success"
-                    },
-                    "message": {
-                        "type": "string",
-                        "title": "Message",
-                        "default": ""
-                    },
-                    "data": {
-                        "anyOf": [
-                            {
-                                "additionalProperties": true,
-                                "type": "object"
-                            },
-                            {
-                                "items": {},
-                                "type": "array"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Data"
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "success"
-                ],
-                "title": "APIResponse"
-            },
-            "AddListenChatRequest": {
-                "properties": {
-                    "wxname": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Wxname",
-                        "default": ""
-                    },
-                    "who": {
-                        "type": "string",
-                        "title": "Who",
-                        "default": "文件传输助手"
-                    }
-                },
-                "type": "object",
-                "title": "AddListenChatRequest"
-            },
-            "ChatWithRequest": {
-                "properties": {
-                    "wxname": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Wxname",
-                        "default": ""
-                    },
-                    "who": {
-                        "type": "string",
-                        "title": "Who",
-                        "default": "文件传输助手"
-                    },
-                    "exact": {
-                        "type": "boolean",
-                        "title": "Exact",
-                        "default": false
-                    }
-                },
-                "type": "object",
-                "title": "ChatWithRequest"
-            },
-            "GetAllSubWindowRequest": {
-                "properties": {
-                    "wxname": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Wxname",
-                        "default": ""
-                    }
-                },
-                "type": "object",
-                "title": "GetAllSubWindowRequest"
-            },
-            "GetNewFriendsRequest": {
-                "properties": {
-                    "wxname": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Wxname",
-                        "default": ""
-                    },
-                    "acceptable": {
-                        "type": "boolean",
-                        "title": "Acceptable",
-                        "default": true
-                    }
-                },
-                "type": "object",
-                "title": "GetNewFriendsRequest"
-            },
-            "GetNewMessageRequest": {
-                "properties": {
-                    "wxname": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Wxname",
-                        "default": ""
-                    },
-                    "who": {
-                        "type": "string",
-                        "title": "Who"
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "who"
-                ],
-                "title": "GetNewMessageRequest"
-            },
-            "GetNextNewMessageRequest": {
-                "properties": {
-                    "wxname": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Wxname",
-                        "default": ""
-                    },
-                    "filter_mute": {
-                        "type": "boolean",
-                        "title": "Filter Mute",
-                        "default": false
-                    }
-                },
-                "type": "object",
-                "title": "GetNextNewMessageRequest"
-            },
-            "HTTPValidationError": {
-                "properties": {
-                    "detail": {
-                        "items": {
-                            "$ref": "#/components/schemas/ValidationError"
-                        },
-                        "type": "array",
-                        "title": "Detail"
-                    }
-                },
-                "type": "object",
-                "title": "HTTPValidationError"
-            },
-            "SendUrlCardRequest": {
-                "properties": {
-                    "wxname": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Wxname",
-                        "default": ""
-                    },
-                    "url": {
-                        "type": "string",
-                        "title": "Url",
-                        "default": "https://plus.wxauto.org"
-                    },
-                    "friends": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "items": {
-                                    "type": "string"
-                                },
-                                "type": "array"
-                            }
-                        ],
-                        "title": "Friends",
-                        "default": "文件传输助手"
-                    },
-                    "timeout": {
-                        "type": "integer",
-                        "title": "Timeout",
-                        "default": 10
-                    }
-                },
-                "type": "object",
-                "title": "SendUrlCardRequest"
-            },
-            "SwitchToChatPageRequest": {
-                "properties": {
-                    "wxname": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Wxname",
-                        "default": ""
-                    }
-                },
-                "type": "object",
-                "title": "SwitchToChatPageRequest"
-            },
-            "SwitchToContactPageRequest": {
-                "properties": {
-                    "wxname": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Wxname",
-                        "default": ""
-                    }
-                },
-                "type": "object",
-                "title": "SwitchToContactPageRequest"
-            },
-            "ValidationError": {
-                "properties": {
-                    "loc": {
-                        "items": {
-                            "anyOf": [
-                                {
-                                    "type": "string"
-                                },
-                                {
-                                    "type": "integer"
-                                }
-                            ]
-                        },
-                        "type": "array",
-                        "title": "Location"
-                    },
-                    "msg": {
-                        "type": "string",
-                        "title": "Message"
-                    },
-                    "type": {
-                        "type": "string",
-                        "title": "Error Type"
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "loc",
-                    "msg",
-                    "type"
-                ],
-                "title": "ValidationError"
-            },
-            "app__models__request__apps__AcceptNewFriendRequest": {
-                "properties": {
-                    "wxname": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Wxname",
-                        "default": ""
-                    },
-                    "keywords": {
-                        "type": "string",
-                        "title": "Keywords"
-                    },
-                    "remark": {
-                        "type": "string",
-                        "title": "Remark",
-                        "default": ""
-                    },
-                    "tags": {
-                        "type": "string",
-                        "title": "Tags",
-                        "default": ""
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "keywords"
-                ],
-                "title": "AcceptNewFriendRequest"
-            },
-            "app__models__request__chat__GetAllMessageRequest": {
-                "properties": {
-                    "wxname": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Wxname",
-                        "default": ""
-                    },
-                    "who": {
-                        "type": "string",
-                        "title": "Who"
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "who"
-                ],
-                "title": "GetAllMessageRequest"
-            },
-            "app__models__request__chat__SendMessageRequest": {
-                "properties": {
-                    "wxname": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Wxname",
-                        "default": ""
-                    },
-                    "who": {
-                        "type": "string",
-                        "title": "Who"
-                    },
-                    "msg": {
-                        "type": "string",
-                        "title": "Msg"
-                    },
-                    "clear": {
-                        "type": "boolean",
-                        "title": "Clear",
-                        "default": true
-                    },
-                    "at": {
-                        "items": {
-                            "type": "string"
-                        },
-                        "type": "array",
-                        "title": "At"
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "who",
-                    "msg"
-                ],
-                "title": "SendMessageRequest"
-            },
-            "app__models__request__chat__SendQuoteByIdRequest": {
-                "properties": {
-                    "wxname": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Wxname",
-                        "default": ""
-                    },
-                    "who": {
-                        "type": "string",
-                        "title": "Who"
-                    },
-                    "msg_id": {
-                        "type": "string",
-                        "title": "Msg Id"
-                    },
-                    "content": {
-                        "type": "string",
-                        "title": "Content"
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "who",
-                    "msg_id",
-                    "content"
-                ],
-                "title": "SendQuoteByIdRequest"
-            },
-            "app__models__request__wechat__AcceptNewFriendRequest": {
-                "properties": {
-                    "wxname": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Wxname",
-                        "default": ""
-                    },
-                    "new_friend_id": {
-                        "type": "string",
-                        "title": "New Friend Id"
-                    },
-                    "remark": {
-                        "type": "string",
-                        "title": "Remark"
-                    },
-                    "tags": {
-                        "anyOf": [
-                            {
-                                "items": {
-                                    "type": "string"
-                                },
-                                "type": "array"
-                            },
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Tags"
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "new_friend_id"
-                ],
-                "title": "AcceptNewFriendRequest"
-            },
-            "app__models__request__wechat__GetAllMessageRequest": {
-                "properties": {
-                    "wxname": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Wxname",
-                        "default": ""
-                    },
-                    "who": {
-                        "type": "string",
-                        "title": "Who",
-                        "default": "文件传输助手"
-                    }
-                },
-                "type": "object",
-                "title": "GetAllMessageRequest"
-            },
-            "app__models__request__wechat__SendMessageRequest": {
-                "properties": {
-                    "wxname": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Wxname",
-                        "default": ""
-                    },
-                    "who": {
-                        "type": "string",
-                        "title": "Who",
-                        "default": "文件传输助手"
-                    },
-                    "exact": {
-                        "type": "boolean",
-                        "title": "Exact",
-                        "default": false
-                    },
-                    "msg": {
-                        "type": "string",
-                        "title": "Msg"
-                    },
-                    "clear": {
-                        "type": "boolean",
-                        "title": "Clear",
-                        "default": true
-                    },
-                    "at": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "items": {
-                                    "type": "string"
-                                },
-                                "type": "array"
-                            }
-                        ],
-                        "title": "At",
-                        "default": ""
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "msg"
-                ],
-                "title": "SendMessageRequest"
-            },
-            "app__models__request__wechat__SendQuoteByIdRequest": {
-                "properties": {
-                    "wxname": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Wxname",
-                        "default": ""
-                    },
-                    "msg_id": {
-                        "type": "string",
-                        "title": "Msg Id"
-                    },
-                    "content": {
-                        "type": "string",
-                        "title": "Content"
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "msg_id",
-                    "content"
-                ],
-                "title": "SendQuoteByIdRequest"
+    "/v1/wechat/status": {
+      "get": {
+        "tags": [
+          "WeChat"
+        ],
+        "summary": "查看微信实例状态",
+        "description": "获取微信实例当前状态\n\nReturns:\n    APIResponse: 包含初始化状态和客户端信息",
+        "operationId": "[wx]获取实例状态",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse"
+                }
+              }
             }
+          }
         },
-        "securitySchemes": {
-            "HTTPBearer": {
-                "type": "http",
-                "scheme": "bearer"
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/v1/wechat/send": {
+      "post": {
+        "tags": [
+          "WeChat"
+        ],
+        "summary": "发送文字消息",
+        "description": "微信主窗口发送消息",
+        "operationId": "[wx]发送消息",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendMessageRequest"
+              }
             }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/v1/wechat/sendfile": {
+      "post": {
+        "tags": [
+          "WeChat"
+        ],
+        "summary": "发送文件、图片、视频等（请先调用上传文件接口）",
+        "description": "微信主窗口发送文件",
+        "operationId": "[wx]发送文件",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendFileRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/v1/wechat/chatwith": {
+      "post": {
+        "tags": [
+          "WeChat"
+        ],
+        "summary": "切换聊天窗口",
+        "description": "微信主窗口切换聊天窗口",
+        "operationId": "[wx]切换聊天窗口",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatWithRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/v1/wechat/chatinfo": {
+      "post": {
+        "tags": [
+          "WeChat"
+        ],
+        "summary": "获取当前或指定聊天窗口信息",
+        "description": "获取聊天信息；指定 who 时先切换到该聊天。",
+        "operationId": "[wx]获取聊天信息",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatInfoRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/v1/wechat/getsession": {
+      "post": {
+        "tags": [
+          "WeChat"
+        ],
+        "summary": "获取当前会话列表",
+        "description": "获取当前会话列表",
+        "operationId": "[wx]获取会话列表",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetSessionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/v1/wechat/getallsubwindow": {
+      "post": {
+        "tags": [
+          "WeChat"
+        ],
+        "summary": "获取所有子窗口信息",
+        "description": "获取微信所有子窗口信息",
+        "operationId": "[wx]获取所有子窗口",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetAllSubWindowRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/v1/wechat/getsubwindow": {
+      "post": {
+        "tags": [
+          "WeChat"
+        ],
+        "summary": "获取指定聊天窗口信息",
+        "description": "获取微信指定子窗口信息",
+        "operationId": "[wx]获取指定子窗口",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetSubWindowRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/v1/wechat/getallmessage": {
+      "post": {
+        "tags": [
+          "WeChat"
+        ],
+        "summary": "获取当前窗口加载的消息",
+        "description": "获取当前窗口加载的消息",
+        "operationId": "[wx]获取当前窗口加载的消息",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetAllMessageRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/v1/wechat/gethistorymessage": {
+      "post": {
+        "tags": [
+          "WeChat"
+        ],
+        "summary": "✨获取历史消息",
+        "description": "获取历史消息",
+        "operationId": "[wx]获取历史消息",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetHistoryMessageRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/v1/wechat/sendurlcard": {
+      "post": {
+        "tags": [
+          "WeChat"
+        ],
+        "summary": "✨发送url卡片",
+        "description": "微信发送url卡片",
+        "operationId": "[wx]发送url卡片",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendUrlCardRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/v1/wechat/getnextnewmessage": {
+      "post": {
+        "tags": [
+          "WeChat"
+        ],
+        "summary": "获取一个未读消息窗口的新消息",
+        "description": "获取微信下一个新消息",
+        "operationId": "[wx]获取下一个新消息",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetNextNewMessageRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/v1/wechat/group/members/add": {
+      "post": {
+        "tags": [
+          "WeChat"
+        ],
+        "summary": "✨向当前或指定群聊添加一个或多个成员",
+        "description": "添加群成员。",
+        "operationId": "[wx]添加群成员",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddGroupMembersRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/v1/wechat/group/create": {
+      "post": {
+        "tags": [
+          "WeChat"
+        ],
+        "summary": "✨使用联系人列表创建群聊",
+        "description": "创建群聊。",
+        "operationId": "[wx]创建群聊",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateGroupRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/v1/wechat/group/name": {
+      "post": {
+        "tags": [
+          "WeChat"
+        ],
+        "summary": "✨修改当前或指定群聊名称",
+        "description": "修改群聊名称。",
+        "operationId": "[wx]修改群聊名称",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetGroupNameRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/v1/wechat/group/remark": {
+      "post": {
+        "tags": [
+          "WeChat"
+        ],
+        "summary": "✨修改当前或指定群聊备注",
+        "description": "修改群聊备注。",
+        "operationId": "[wx]修改群聊备注",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetGroupRemarkRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/v1/wechat/group/announcement": {
+      "post": {
+        "tags": [
+          "WeChat"
+        ],
+        "summary": "✨修改当前或指定群公告",
+        "description": "修改群公告。",
+        "operationId": "[wx]修改群公告",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetGroupAnnouncementRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/v1/wechat/group/my-nickname": {
+      "post": {
+        "tags": [
+          "WeChat"
+        ],
+        "summary": "✨修改我在当前或指定群聊中的昵称",
+        "description": "修改群内昵称。",
+        "operationId": "[wx]修改群内昵称",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetGroupMyNicknameRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/v1/wechat/getrecentgroups": {
+      "post": {
+        "tags": [
+          "WeChat"
+        ],
+        "summary": "✨获取最近群聊列表",
+        "description": "获取最近群聊列表",
+        "operationId": "[wx]获取群聊列表",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetAllRecentGroupsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/v1/wechat/getfriends": {
+      "post": {
+        "tags": [
+          "WeChat"
+        ],
+        "summary": "✨获取好友详情列表",
+        "description": "获取好友详情列表",
+        "operationId": "[wx]获取好友列表",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetFriendDetailsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/v1/wechat/getmyinfo": {
+      "post": {
+        "tags": [
+          "WeChat"
+        ],
+        "summary": "✨获取我的账号信息",
+        "description": "获取我的账号信息",
+        "operationId": "[wx]获取我的信息",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetSessionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/v1/wechat/switch/chat": {
+      "post": {
+        "tags": [
+          "WeChat"
+        ],
+        "summary": "主窗口切换到聊天页面",
+        "description": "切换到聊天页面",
+        "operationId": "[wx]切换到聊天页面",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SwitchToChatPageRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/v1/wechat/isonline": {
+      "post": {
+        "tags": [
+          "WeChat"
+        ],
+        "summary": "✨微信是否在线（掉线）",
+        "description": "微信是否在线",
+        "operationId": "[wx]是否在线（掉线）",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IsOnlineRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/v1/wechat/switch/contact": {
+      "post": {
+        "tags": [
+          "WeChat"
+        ],
+        "summary": "主窗口切换到联系人页面",
+        "description": "切换到联系人页面",
+        "operationId": "[wx]切换到联系人页面",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SwitchToContactPageRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/v1/files/upload": {
+      "post": {
+        "tags": [
+          "files"
+        ],
+        "summary": "上传文件",
+        "description": "上传文件\n\nArgs:\n    file: 上传的文件\n    description: 文件描述\n    uploader: 上传者\n    token: 认证令牌\n\nReturns:\n    APIResponse: 包含文件上传结果",
+        "operationId": "upload_file_v1_files_upload_post",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_upload_file_v1_files_upload_post"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/v1/files/{file_id}": {
+      "get": {
+        "tags": [
+          "files"
+        ],
+        "summary": "获取文件信息",
+        "description": "获取文件信息\n\nArgs:\n    file_id: 文件ID\n    token: 认证令牌\n\nReturns:\n    APIResponse: 包含文件信息",
+        "operationId": "get_file_v1_files__file_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "file_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "File Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
         }
+      },
+      "delete": {
+        "tags": [
+          "files"
+        ],
+        "summary": "删除文件",
+        "description": "删除文件\n\nArgs:\n    file_id: 文件ID\n    token: 认证令牌\n\nReturns:\n    APIResponse: 删除结果",
+        "operationId": "delete_file_v1_files__file_id__delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "file_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "File Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/files/": {
+      "get": {
+        "tags": [
+          "files"
+        ],
+        "summary": "获取文件列表",
+        "description": "列出文件\n\nArgs:\n    skip: 跳过数量\n    limit: 限制数量\n    token: 认证令牌\n\nReturns:\n    APIResponse: 包含文件列表和总数",
+        "operationId": "list_files_v1_files__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "skip",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "title": "Skip"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 100,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/info/package": {
+      "get": {
+        "tags": [
+          "Info"
+        ],
+        "summary": "获取当前使用的包信息",
+        "description": "获取当前使用的包信息",
+        "operationId": "[info]获取包信息",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/activation/activate": {
+      "post": {
+        "tags": [
+          "Activation"
+        ],
+        "summary": "✨激活wxautox4许可证",
+        "description": "激活wxautox4许可证\n\n使用许可证密钥激活wxautox4，激活后才能使用微信自动化功能。\n\n- **license_key**: 许可证密钥\n\n无需认证即可调用此接口。",
+        "operationId": "[activation]激活许可证",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ActivateLicenseRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/activation/check": {
+      "get": {
+        "tags": [
+          "Activation"
+        ],
+        "summary": "✨检查wxautox4激活状态",
+        "description": "检查wxautox4激活状态\n\n返回当前wxautox4的激活状态。\n\n无需认证即可调用此接口。",
+        "operationId": "[activation]检查激活状态",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
+  },
+  "components": {
+    "schemas": {
+      "APIResponse": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": ""
+          },
+          "data": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "items": {},
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data"
+          }
+        },
+        "type": "object",
+        "required": [
+          "success"
+        ],
+        "title": "APIResponse"
+      },
+      "ActivateLicenseRequest": {
+        "properties": {
+          "license_key": {
+            "type": "string",
+            "title": "License Key"
+          }
+        },
+        "type": "object",
+        "required": [
+          "license_key"
+        ],
+        "title": "ActivateLicenseRequest",
+        "description": "激活wxautox4许可证请求"
+      },
+      "AddGroupMembersRequest": {
+        "properties": {
+          "wxname": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wxname",
+            "default": ""
+          },
+          "who": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Who"
+          },
+          "exact": {
+            "type": "boolean",
+            "title": "Exact",
+            "default": false
+          },
+          "members": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            ],
+            "title": "Members"
+          }
+        },
+        "type": "object",
+        "required": [
+          "members"
+        ],
+        "title": "AddGroupMembersRequest"
+      },
+      "Body_upload_file_v1_files_upload_post": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "File",
+            "description": "要上传的文件",
+            "format": "binary"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "文件描述"
+          },
+          "uploader": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Uploader",
+            "description": "上传者"
+          }
+        },
+        "type": "object",
+        "title": "Body_upload_file_v1_files_upload_post"
+      },
+      "ChatInfoRequest": {
+        "properties": {
+          "wxname": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wxname",
+            "default": ""
+          },
+          "who": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Who"
+          },
+          "exact": {
+            "type": "boolean",
+            "title": "Exact",
+            "default": false
+          }
+        },
+        "type": "object",
+        "title": "ChatInfoRequest"
+      },
+      "ChatWithRequest": {
+        "properties": {
+          "wxname": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wxname",
+            "default": ""
+          },
+          "who": {
+            "type": "string",
+            "title": "Who",
+            "default": "文件传输助手"
+          },
+          "exact": {
+            "type": "boolean",
+            "title": "Exact",
+            "default": false
+          }
+        },
+        "type": "object",
+        "title": "ChatWithRequest"
+      },
+      "CreateGroupRequest": {
+        "properties": {
+          "wxname": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wxname",
+            "default": ""
+          },
+          "contacts": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Contacts"
+          }
+        },
+        "type": "object",
+        "required": [
+          "contacts"
+        ],
+        "title": "CreateGroupRequest"
+      },
+      "GetAllMessageRequest": {
+        "properties": {
+          "wxname": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wxname",
+            "default": ""
+          },
+          "who": {
+            "type": "string",
+            "title": "Who",
+            "default": "文件传输助手"
+          }
+        },
+        "type": "object",
+        "title": "GetAllMessageRequest"
+      },
+      "GetAllRecentGroupsRequest": {
+        "properties": {
+          "wxname": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wxname",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "title": "GetAllRecentGroupsRequest"
+      },
+      "GetAllSubWindowRequest": {
+        "properties": {
+          "wxname": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wxname",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "title": "GetAllSubWindowRequest"
+      },
+      "GetFriendDetailsRequest": {
+        "properties": {
+          "wxname": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wxname",
+            "default": ""
+          },
+          "n": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "N"
+          },
+          "save_head_image": {
+            "type": "boolean",
+            "title": "Save Head Image",
+            "default": false
+          }
+        },
+        "type": "object",
+        "title": "GetFriendDetailsRequest"
+      },
+      "GetHistoryMessageRequest": {
+        "properties": {
+          "wxname": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wxname",
+            "default": ""
+          },
+          "who": {
+            "type": "string",
+            "title": "Who",
+            "default": "文件传输助手"
+          },
+          "exact": {
+            "type": "boolean",
+            "title": "Exact",
+            "default": false
+          },
+          "n": {
+            "type": "integer",
+            "title": "N",
+            "default": 50
+          }
+        },
+        "type": "object",
+        "title": "GetHistoryMessageRequest"
+      },
+      "GetNextNewMessageRequest": {
+        "properties": {
+          "wxname": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wxname",
+            "default": ""
+          },
+          "filter_mute": {
+            "type": "boolean",
+            "title": "Filter Mute",
+            "default": false
+          }
+        },
+        "type": "object",
+        "title": "GetNextNewMessageRequest"
+      },
+      "GetSessionRequest": {
+        "properties": {
+          "wxname": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wxname",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "title": "GetSessionRequest"
+      },
+      "GetSubWindowRequest": {
+        "properties": {
+          "wxname": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wxname",
+            "default": ""
+          },
+          "nickname": {
+            "type": "string",
+            "title": "Nickname"
+          }
+        },
+        "type": "object",
+        "required": [
+          "nickname"
+        ],
+        "title": "GetSubWindowRequest"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "IsOnlineRequest": {
+        "properties": {
+          "wxname": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wxname",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "title": "IsOnlineRequest"
+      },
+      "SendFileRequest": {
+        "properties": {
+          "wxname": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wxname",
+            "default": ""
+          },
+          "who": {
+            "type": "string",
+            "title": "Who",
+            "default": "文件传输助手"
+          },
+          "exact": {
+            "type": "boolean",
+            "title": "Exact",
+            "default": false
+          },
+          "file_id": {
+            "type": "string",
+            "title": "File Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file_id"
+        ],
+        "title": "SendFileRequest"
+      },
+      "SendMessageRequest": {
+        "properties": {
+          "wxname": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wxname",
+            "default": ""
+          },
+          "who": {
+            "type": "string",
+            "title": "Who",
+            "default": "文件传输助手"
+          },
+          "exact": {
+            "type": "boolean",
+            "title": "Exact",
+            "default": false
+          },
+          "msg": {
+            "type": "string",
+            "title": "Msg"
+          },
+          "clear": {
+            "type": "boolean",
+            "title": "Clear",
+            "default": true
+          },
+          "at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            ],
+            "title": "At",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "msg"
+        ],
+        "title": "SendMessageRequest"
+      },
+      "SendUrlCardRequest": {
+        "properties": {
+          "wxname": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wxname",
+            "default": ""
+          },
+          "url": {
+            "type": "string",
+            "title": "Url",
+            "default": "https://plus.wxauto.org"
+          },
+          "friends": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            ],
+            "title": "Friends",
+            "default": "文件传输助手"
+          },
+          "timeout": {
+            "type": "integer",
+            "title": "Timeout",
+            "default": 10
+          }
+        },
+        "type": "object",
+        "title": "SendUrlCardRequest"
+      },
+      "SetGroupAnnouncementRequest": {
+        "properties": {
+          "wxname": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wxname",
+            "default": ""
+          },
+          "who": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Who"
+          },
+          "exact": {
+            "type": "boolean",
+            "title": "Exact",
+            "default": false
+          },
+          "value": {
+            "type": "string",
+            "title": "Value"
+          }
+        },
+        "type": "object",
+        "required": [
+          "value"
+        ],
+        "title": "SetGroupAnnouncementRequest"
+      },
+      "SetGroupMyNicknameRequest": {
+        "properties": {
+          "wxname": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wxname",
+            "default": ""
+          },
+          "who": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Who"
+          },
+          "exact": {
+            "type": "boolean",
+            "title": "Exact",
+            "default": false
+          },
+          "value": {
+            "type": "string",
+            "title": "Value"
+          }
+        },
+        "type": "object",
+        "required": [
+          "value"
+        ],
+        "title": "SetGroupMyNicknameRequest"
+      },
+      "SetGroupNameRequest": {
+        "properties": {
+          "wxname": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wxname",
+            "default": ""
+          },
+          "who": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Who"
+          },
+          "exact": {
+            "type": "boolean",
+            "title": "Exact",
+            "default": false
+          },
+          "value": {
+            "type": "string",
+            "title": "Value"
+          }
+        },
+        "type": "object",
+        "required": [
+          "value"
+        ],
+        "title": "SetGroupNameRequest"
+      },
+      "SetGroupRemarkRequest": {
+        "properties": {
+          "wxname": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wxname",
+            "default": ""
+          },
+          "who": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Who"
+          },
+          "exact": {
+            "type": "boolean",
+            "title": "Exact",
+            "default": false
+          },
+          "value": {
+            "type": "string",
+            "title": "Value"
+          }
+        },
+        "type": "object",
+        "required": [
+          "value"
+        ],
+        "title": "SetGroupRemarkRequest"
+      },
+      "SwitchToChatPageRequest": {
+        "properties": {
+          "wxname": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wxname",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "title": "SwitchToChatPageRequest"
+      },
+      "SwitchToContactPageRequest": {
+        "properties": {
+          "wxname": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wxname",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "title": "SwitchToContactPageRequest"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    },
+    "securitySchemes": {
+      "HTTPBearer": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  }
 }

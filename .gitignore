@@ -274,12 +274,6 @@ Temporary Items
 config.local.yaml
 config.*.local.yaml
 
-# 测试文件
-test_*.py
-*_test.py
-tests/
-*.test
-
 # 报告和文档（临时）
 *.report
 *报告.md

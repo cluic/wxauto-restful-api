@@ -1,7 +1,7 @@
 """WeChat Service with Queue-Based Operations"""
 import asyncio
 import os
-from typing import Optional, Union, List
+from typing import Any, Callable, Optional, Union, List
 from app.models.response import APIResponse
 from app.services.file_service import FileService
 from app.services.operation_queue import OperationQueue
@@ -165,20 +165,67 @@ def get_raw_messages(msgs, chat_info):
     # result['msg'] = raw_msgs
     return raw_msgs
 
-def safe_switch_chat(wx, target: str, max_retries: int = 3) -> bool:
+
+def _build_wx_response(
+        result: Any,
+        success_message: str,
+        failure_message: str
+) -> APIResponse:
+    """将 wxautox4 的 WxResponse 转换为统一 API 响应。"""
+    if isinstance(result, APIResponse):
+        return result
+
+    success = bool(result)
+    message = ""
+    data = None
+
+    if hasattr(result, "get"):
+        message = result.get("message") or ""
+        data = result.get("data")
+
+    # APIResponse.data 当前只接受 dict/list/None，保留非结构化 SDK 数据。
+    if data is not None and not isinstance(data, (dict, list)):
+        data = {"result": data}
+
+    return APIResponse(
+        success=success,
+        message=message or (success_message if success else failure_message),
+        data=data
+    )
+
+
+def safe_switch_chat(
+        wx,
+        target: str,
+        exact: Optional[bool] = None,
+        max_retries: int = 3
+) -> bool:
     for attempt in range(max_retries):
         try:
-            wx.ChatWith(who=target)
+            if exact is None:
+                # 保留旧调用依赖的 SDK 默认匹配行为。
+                wx.ChatWith(who=target)
+            else:
+                wx.ChatWith(who=target, exact=exact)
             time.sleep(0.5)
-            if wx.ChatInfo().get('chat_name') == target:
+            chat_name = (wx.ChatInfo() or {}).get('chat_name')
+            if chat_name and (exact is False or chat_name == target):
                 return True
         except Exception as e:
-            print(f"发送失败 ({attempt+1}/{max_retries}): {e}")
+            print(f"切换聊天失败 ({attempt+1}/{max_retries}): {e}")
             if attempt < max_retries - 1:
                 time.sleep(1)
     return False
 
-def safe_send_msg(wx, target: str, msg: str, at: Optional[str | list] = None, clear: bool = True, max_retries: int = 3) -> bool:
+def safe_send_msg(
+        wx,
+        target: str,
+        msg: str,
+        at: Optional[str | list] = None,
+        clear: bool = True,
+        exact: bool = False,
+        max_retries: int = 3
+) -> bool:
     """安全发送消息，确保发送给正确的联系人
 
     Args:
@@ -194,11 +241,12 @@ def safe_send_msg(wx, target: str, msg: str, at: Optional[str | list] = None, cl
     """
     for attempt in range(max_retries):
         try:
-            wx.ChatWith(who=target)
+            wx.ChatWith(who=target, exact=exact)
             time.sleep(0.5)
-            if wx.ChatInfo().get('chat_name') == target:
+            chat_name = (wx.ChatInfo() or {}).get('chat_name')
+            if chat_name and (not exact or chat_name == target):
                 result = wx.SendMsg(msg=msg, at=at, clear=clear)
-                return True
+                return bool(result)
         except Exception as e:
             print(f"发送失败 ({attempt+1}/{max_retries}): {e}")
             if attempt < max_retries - 1:
@@ -228,6 +276,180 @@ class WeChatService:
             self._initialized = True
             print("[WeChatService] 服务已初始化，队列执行器已启动", flush=True)
 
+    async def _execute_group_operation(
+            self,
+            operation: Callable[[WeChat], Any],
+            success_message: str,
+            failure_message: str,
+            wxname: Optional[str] = None,
+            who: Optional[str] = None,
+            exact: bool = False,
+            require_group_context: bool = True
+    ) -> APIResponse:
+        """在串行队列中对当前群聊或指定群聊执行操作。"""
+        @handle_service_error(custom_message=failure_message)
+        def _execute():
+            wx = get_wechat(wxname)
+            target = who.strip() if isinstance(who, str) else None
+
+            if target:
+                if not safe_switch_chat(wx, target=target, exact=exact):
+                    return APIResponse(
+                        success=False,
+                        message=f"找不到目标群聊：{target}",
+                        data={"error_code": "GROUP_CHAT_NOT_FOUND"}
+                    )
+
+            if require_group_context:
+                chat_info = wx.ChatInfo() or {}
+                if chat_info.get("chat_type") != "group":
+                    return APIResponse(
+                        success=False,
+                        message=(
+                            f"目标不是群聊：{target}"
+                            if target
+                            else "当前聊天窗口不是群聊"
+                        ),
+                        data={"error_code": "GROUP_CHAT_REQUIRED"}
+                    )
+
+            result = operation(wx)
+            return _build_wx_response(result, success_message, failure_message)
+
+        # 群变更不是幂等操作。线程池任务超时后无法可靠取消，禁止自动重试，
+        # 避免重复建群、重复拉人或重复修改。
+        return await self._queue.submit(_execute, max_retries=0)
+
+    async def get_chat_info(
+            self,
+            who: Optional[str] = None,
+            exact: bool = False,
+            wxname: Optional[str] = None
+    ) -> APIResponse:
+        """获取当前聊天信息，指定 who 时先切换到目标聊天。"""
+        @handle_service_error(custom_message="获取聊天信息失败")
+        def _get_info():
+            from app.utils.response_builder import single_object
+
+            wx = get_wechat(wxname)
+            if who and not safe_switch_chat(wx, target=who, exact=exact):
+                return APIResponse(
+                    success=False,
+                    message=f"找不到聊天窗口：{who}",
+                    data={"error_code": "CHAT_NOT_FOUND"}
+                )
+
+            chat_info = wx.ChatInfo()
+            if not isinstance(chat_info, dict) or not chat_info:
+                return APIResponse(
+                    success=False,
+                    message="当前没有可用的聊天信息",
+                    data={"error_code": "CHAT_INFO_UNAVAILABLE"}
+                )
+
+            return single_object(obj=chat_info, message="")
+
+        return await self._queue.submit(_get_info)
+
+    async def add_group_members(
+            self,
+            members: Union[str, List[str]],
+            who: Optional[str] = None,
+            exact: bool = False,
+            wxname: Optional[str] = None
+    ) -> APIResponse:
+        """向当前群聊或指定群聊添加成员。"""
+        return await self._execute_group_operation(
+            operation=lambda wx: wx.AddGroupMembers(members=members),
+            success_message="群成员添加成功",
+            failure_message="添加群成员失败",
+            wxname=wxname,
+            who=who,
+            exact=exact
+        )
+
+    async def create_group(
+            self,
+            contacts: List[str],
+            wxname: Optional[str] = None
+    ) -> APIResponse:
+        """创建群聊。"""
+        return await self._execute_group_operation(
+            operation=lambda wx: wx.CreateGroup(contacts=contacts),
+            success_message="群聊创建成功",
+            failure_message="创建群聊失败",
+            wxname=wxname,
+            require_group_context=False
+        )
+
+    async def set_group_name(
+            self,
+            value: str,
+            who: Optional[str] = None,
+            exact: bool = False,
+            wxname: Optional[str] = None
+    ) -> APIResponse:
+        """修改当前群聊或指定群聊名称。"""
+        return await self._execute_group_operation(
+            operation=lambda wx: wx.SetGroupName(value=value),
+            success_message="群聊名称修改成功",
+            failure_message="修改群聊名称失败",
+            wxname=wxname,
+            who=who,
+            exact=exact
+        )
+
+    async def set_group_remark(
+            self,
+            value: str,
+            who: Optional[str] = None,
+            exact: bool = False,
+            wxname: Optional[str] = None
+    ) -> APIResponse:
+        """修改当前群聊或指定群聊备注。"""
+        return await self._execute_group_operation(
+            operation=lambda wx: wx.SetGroupRemark(value=value),
+            success_message="群聊备注修改成功",
+            failure_message="修改群聊备注失败",
+            wxname=wxname,
+            who=who,
+            exact=exact
+        )
+
+    async def set_group_announcement(
+            self,
+            value: str,
+            who: Optional[str] = None,
+            exact: bool = False,
+            wxname: Optional[str] = None
+    ) -> APIResponse:
+        """修改当前群聊或指定群公告。"""
+        return await self._execute_group_operation(
+            operation=lambda wx: wx.SetGroupAnnouncement(value=value),
+            success_message="群公告修改成功",
+            failure_message="修改群公告失败",
+            wxname=wxname,
+            who=who,
+            exact=exact
+        )
+
+    async def set_group_my_nickname(
+            self,
+            value: str,
+            who: Optional[str] = None,
+            exact: bool = False,
+            wxname: Optional[str] = None
+    ) -> APIResponse:
+        """修改我在当前群聊或指定群聊中的昵称。"""
+        return await self._execute_group_operation(
+            operation=lambda wx: wx.SetGroupMyNickname(value=value),
+            success_message="群内昵称修改成功",
+            failure_message="修改群内昵称失败",
+            wxname=wxname,
+            who=who,
+            exact=exact
+        )
+
     async def send_message(
             self,
             msg: str,
@@ -252,7 +474,7 @@ class WeChatService:
                 )
 
             # result = wx.SendMsg(msg=msg, who=who, clear=clear, at=at, exact=exact)
-            result = safe_send_msg(wx, target=who, msg=msg, at=at, clear=clear)
+            result = safe_send_msg(wx, target=who, msg=msg, at=at, clear=clear, exact=exact)
             if result:
                 return APIResponse(success=True, message='发送成功')
             else:
@@ -272,7 +494,7 @@ class WeChatService:
         """发送消息（同步接口）"""
         wx = get_wechat(wxname)
         # result = wx.SendMsg(msg=msg, who=who, clear=clear, at=at, exact=exact)
-        result = safe_send_msg(wx, target=who, msg=msg, at=at, clear=clear)
+        result = safe_send_msg(wx, target=who, msg=msg, at=at, clear=clear, exact=exact)
         if result:
             return APIResponse(success=True, message='发送成功')
         else:
@@ -339,7 +561,7 @@ class WeChatService:
 
         # 发送文件
         wx = get_wechat(wxname)
-        if not safe_switch_chat(wx, target=who):
+        if not safe_switch_chat(wx, target=who, exact=exact):
             return APIResponse(success=False, message="文件发送失败")
         result = wx.SendFiles(filepath=file_info.file_path)
 
@@ -369,7 +591,7 @@ class WeChatService:
             from app.utils.response_builder import single_object, error
 
             wx = get_wechat(wxname)
-            result = safe_switch_chat(wx, target=who)
+            result = safe_switch_chat(wx, target=who, exact=exact)
             if result:
                 chat_info = wx.ChatInfo()
                 return single_object(
@@ -392,7 +614,7 @@ class WeChatService:
         from app.utils.response_builder import single_object, error
 
         wx = get_wechat(wxname)
-        result = safe_switch_chat(wx, target=who)
+        result = safe_switch_chat(wx, target=who, exact=exact)
         if result:
             chat_info = wx.ChatInfo()
             return single_object(

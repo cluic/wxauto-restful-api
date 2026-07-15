@@ -142,6 +142,7 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000
 - `POST /v1/wechat/getsubwindow` - 获取指定子窗口
 - `POST /v1/wechat/getallsubwindow` - 获取所有子窗口
 - `POST /v1/wechat/chatwith` - 切换聊天窗口
+- `POST /v1/wechat/chatinfo` - 获取聊天窗口信息。请求字段：`who`（可选）、`exact`、`wxname`（可选）
 
 #### 好友管理
 - `POST /v1/wechat/getfriends` - 获取好友列表
@@ -149,6 +150,12 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000
 
 #### 群聊管理
 - `POST /v1/wechat/getrecentgroups` - 获取群聊列表
+- `POST /v1/wechat/group/members/add` - ✨向群聊添加成员。请求字段：`members`（字符串或字符串列表）；`who` 可选，不传则操作当前聊天窗口；另有可选的 `exact`、`wxname`
+- `POST /v1/wechat/group/create` - ✨创建群聊。请求字段：`contacts`（联系人字符串列表）、`wxname`（可选）
+- `POST /v1/wechat/group/name` - ✨修改群聊名称。请求字段：`value`；`who` 可选，不传则操作当前聊天窗口；另有可选的 `exact`、`wxname`
+- `POST /v1/wechat/group/remark` - ✨修改群聊备注。请求字段：`value`；`who` 可选，不传则操作当前聊天窗口；另有可选的 `exact`、`wxname`
+- `POST /v1/wechat/group/announcement` - ✨修改群公告。请求字段：`value`；`who` 可选，不传则操作当前聊天窗口；另有可选的 `exact`、`wxname`
+- `POST /v1/wechat/group/my-nickname` - ✨修改我在群里的昵称。请求字段：`value`；`who` 可选，不传则操作当前聊天窗口；另有可选的 `exact`、`wxname`
 
 #### 页面控制
 - `POST /v1/wechat/switch/chat` - 切换到聊天页面
